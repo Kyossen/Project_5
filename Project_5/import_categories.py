@@ -8,8 +8,8 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "Project_5.settings")
 django.setup()
 from purebeurre.models import Category
 
-resultat = requests.get("https://fr.openfoodfacts.org/categories.json")
-response = resultat.json()
+result = requests.get("https://fr.openfoodfacts.org/categories.json")
+response = result.json()
 
 for search_category in response:
     i = 0
