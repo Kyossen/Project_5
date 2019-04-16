@@ -42,7 +42,7 @@ def choice_product(category):
               "Appuyez sur <<N>> pour passer à la page suivante. "'\n'
               "Appuyez sur <<P>> pour revenir à la page précédente. "'\n'
               "Appuyez sur <<M>> pour revenir au menu. "'\n')
-        
+
         input_user = input()
         if (input_user == "n") or (input_user == "N") and a < nb_page:
             a += 1
@@ -52,23 +52,30 @@ def choice_product(category):
             main()
         elif input_user.isdigit():
             x = int(input_user) - 1
+            if 20 >= int(input_user) >= 1:
+                pass
+            else:
+                print('Vous devez choisir une proposition correct.')
+                break
+
             old_product_api = response['products'][x]
             description_product(old_product_api)
-            
-            old_product_db = Product(image_url=old_product_api['image_url'], 
+
+            old_product_db = Product(image_url=old_product_api['image_url'],
                                      name=old_product_api['product_name'],
-                                     code=old_product_api['code'], 
+                                     code=old_product_api['code'],
                                      nutrition_grade=old_product_api['nutrition_grades'],
-                                     ingredients=old_product_api['ingredients_text_fr'], 
+                                     ingredients=old_product_api['ingredients_text_fr'],
                                      category=category)
-            
+
             if 'ingredients_text_fr' in old_product_api:
                 old_product_db.ingredients = old_product_api['ingredients_text_fr']
-                
+
             old_product_db.save()
             find_better_products(category, old_product_db)
             return
-        
+
+
         else:
             print('Vous devez choisir une proposition correct.')
 
@@ -84,7 +91,7 @@ def find_better_products(category, old_product_db):
                       "Indice nutrionnel: ", product['nutrition_grades'])
                 print('Appuyez sur <<N>> pour passer au produit suivant.', '\n'
                       'Appuyez sur <<Y>> pour sélectionner l\'aliment.')
-                
+
                 input_user = input()
                 if (input_user == "n") or (input_user == "N"):
                     pass
@@ -103,19 +110,19 @@ def subsitution_product(new_product_api, category, old_product_db):
           "Appuyez sur <<Y>> pour valider."'\n'
           "Appuyez sur <<N>> pour revenir au menu de séléction des catégories."'\n'
           "Appuyez sur <<M>> pour revenir au menu.")
-    
+
     input_user = input()
     if (input_user == "n") or (input_user == "N"):
         return
     elif (input_user == "y") or (input_user == "Y"):
-        
-        new_product_db = Product(image_url=new_product_api['image_url'], 
+
+        new_product_db = Product(image_url=new_product_api['image_url'],
                                  name=new_product_api['product_name'],
-                                 code=new_product_api['code'], 
+                                 code=new_product_api['code'],
                                  nutrition_grade=new_product_api['nutrition_grades'],
-                                 ingredients=new_product_api['ingredients_text_fr'], 
+                                 ingredients=new_product_api['ingredients_text_fr'],
                                  category=category)
-        
+
         if 'ingredients_text_fr' in new_product_api:
             new_product_db.ingredients = new_product_api['ingredients_text_fr']
         new_product_db.save()
@@ -198,17 +205,23 @@ def choice_1():
         elif (input_user == "m") or (input_user == "M"):
             main()
         elif input_user.isdigit():
-            choice_product(categories[int(input_user) - 1])
+            if 10 >= int(input_user) >= 1:
+                choice_product(categories[int(input_user) - 1])
+            else:
+                print('Vous devez choisir une proposition correct.')
         else:
             print('Vous devez choisir une proposition correct.')
 
 
 def choice_2():
-    AllSubstituion = Substitution.objects.get(new_product_id="new_products")
-    print(AllSubstituion)
-    print("Voici vos produits substitués:" '\n'
-          "Appuyez sur <<M>> pour revenir au menu." '\n'
-          "Tapez <<Exit>> pour fermer le programme. ")
+    AllSubstituion = list(Substitution.objects.all())
+    for substitution in AllSubstituion:
+        print("Voici vos produits substitués:" '\n'
+              "Categroie :", substitution.old_product.category,'\n',
+              substitution.old_product.name, "->", substitution.new_product.name, '\n'
+              ""'\n'
+              "Appuyez sur <<M>> pour revenir au menu." '\n'
+              "Tapez <<Exit>> pour fermer le programme. ")
 
     input_user = input()
     if (input_user == "m") or (input_user == "M"):
@@ -225,6 +238,4 @@ def choice_2():
 if __name__ == '__main__':
     main()
 
-# Choice_2, listez les substitutions
-# Contrôler input de l'user -> Fais = Choice_product - main - find_... - substitution -
 # Description lié à un produit
