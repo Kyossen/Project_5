@@ -5,19 +5,15 @@ from django.db import models
 
 
 class Description(models.Model):
-    purchase_places = models.CharField(max_length=255)
-    categories_prev_hierarchy = models.CharField(max_length=255)
-    product_quantity = models.IntegerField()
-    labels_hierarchy = models.CharField(max_length=255)
-    quality_tags = models.IntegerField()
-    manufacturing_places = models.CharField(max_length=255)
-    brands_tags = models.CharField(max_length=255)
-    origins = models.CharField(max_length=255)
-    additives_prev_original_tags = models.CharField(max_length=255)
-    stores_tags = models.CharField(max_length=255)
-    emb_codes_tags = models.IntegerField()
-    nova_group = models.IntegerField()
-    serving_size = models.CharField(max_length=255)
+    purchase_places = models.CharField(max_length=255, null=True, blank=True, default='')
+    product_quantity = models.IntegerField(null=True, blank=True, default=None)
+    labels_hierarchy = models.CharField(max_length=255, null=True, blank=True, default='')
+    quality_tags = models.CharField(max_length=255, null=True, blank=True, default='')
+    manufacturing_places = models.CharField(max_length=255, null=True, blank=True, default='')
+    brands_tags = models.CharField(max_length=255, null=True, blank=True, default='')
+    origins = models.CharField(max_length=255, null=True, blank=True, default='')
+    stores_tags = models.CharField(max_length=255, null=True, blank=True, default='')
+    serving_size = models.CharField(max_length=255, null=True, blank=True, default='')
 
     class Meta:
         managed = True
@@ -40,14 +36,28 @@ class Category(models.Model):
 
 
 class Product(models.Model):
-    image_url = models.CharField(max_length=255, default="Pics")
+    image_url = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     code = models.CharField(max_length=255)
-    nutrition_grade = models.IntegerField()
-    ingredients = models.TextField()
+    nutrition_grade = models.CharField(max_length=255)
+    ingredients = models.TextField(default='')
     #description = models.OneToOneField(Description, on_delete=models.CASCADE, related_name="product")
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="products")
 
+    class Meta:
+        managed = True
+        db_table = "Products"
+        ordering = ['id']
+
+
+class Substitution(models.Model):
+    old_product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="old_products")
+    new_product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="new_products")
+
+    class Meta:
+        managed = True
+        db_table = "Substitutions"
+        ordering = ['id']
     class Meta:
         managed = True
         db_table = "Products"
