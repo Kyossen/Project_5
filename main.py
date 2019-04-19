@@ -1,20 +1,42 @@
-import requests
-import math
+# usr/env/bin Python3.4
+# coding:utf-8
+
+"""
+Import these modules for a good use of the program
+Requests module for that the can program "requests to servers"
+Django for requests handler between servers and code, database, etc...
+And others modules such "os" for good use
+"""
+
+# Import lib
 import os
 import sys
+import math
+
+# Import module
+import requests
+
+# Import Django
 import django
 from django.core.paginator import Paginator
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "Project_5.settings")
 django.setup()
+
+# Import file
 from purebeurre.models import Category, Product, Description, Substitution
+
+"""This function is the main for run the program and open choice to user"""
 
 
 def main():
-    a = print('1 - Quel aliment souhaitez-vous remplacer ?')
-    b = print('2 - Retrouvez vos aliments substitués.')
+
+    # Display the proposals of the user
+    print('1 - Quel aliment souhaitez-vous remplacer ?''\n'
+          '2 - Retrouvez vos aliments substitués.')
     x = input()
 
+    # Create a input() for user choice a proposal and check inptu()
     if x == "1":
         choice_1()
     elif x == "2":
@@ -25,24 +47,38 @@ def main():
         main()
 
 
+"""
+Choice Product is the function that allow a user of choice a product in list that generate with API OpenFoodFact
+The product will are save in database with that description
+"""
+
+
 def choice_product(category):
+    # Init has a counter
     a = 1
     print("Catégorie choisie: ", category, '\n')
+
+    # create a infinite loop
     while True:
+
+        # Request to servers for take the data in API
         result = requests.get(category.url + "/" + str(a) + ".json")
         response = result.json()
         nb_page = math.ceil(response["count"] / response["page_size"])
+
+        # Enumerate the data (products)
         for idx, product in enumerate(response['products']):
             nutrition_grades = ''
             if 'nutrition_grades' in product:
                 nutrition_grades = product['nutrition_grades']
-            print(idx + 1, product['product_name'], '\n' 
-                 "Nutrition grades: ", nutrition_grades, '\n')
+            print(idx + 1, product['product_name'], '\n'
+                                                    "Nutrition grades: ", nutrition_grades, '\n')
         print("Page {} / {}".format(a, nb_page), '\n'
-              "Appuyez sur <<N>> pour passer à la page suivante. "'\n'
-              "Appuyez sur <<P>> pour revenir à la page précédente. "'\n'
-              "Appuyez sur <<M>> pour revenir au menu. "'\n')
+                                                 "Appuyez sur <<N>> pour passer à la page suivante. "'\n'
+                                                 "Appuyez sur <<P>> pour revenir à la page précédente. "'\n'
+                                                 "Appuyez sur <<M>> pour revenir au menu. "'\n')
 
+        # Allow the user do a choice for continue to run and check user choice
         input_user = input()
         if (input_user == "n") or (input_user == "N") and a < nb_page:
             a += 1
@@ -58,6 +94,7 @@ def choice_product(category):
                 print('Vous devez choisir une proposition correct.')
                 break
 
+            # Save product and that description in database
             old_product_api = response['products'][x]
             description_product(old_product_api)
 
@@ -66,6 +103,7 @@ def choice_product(category):
                                      code=old_product_api['code'],
                                      nutrition_grade=old_product_api['nutrition_grades'],
                                      ingredients=old_product_api['ingredients_text_fr'],
+
                                      category=category)
 
             if 'ingredients_text_fr' in old_product_api:
@@ -80,18 +118,33 @@ def choice_product(category):
             print('Vous devez choisir une proposition correct.')
 
 
+"""
+Find better product is the function that displays the bests
+products selected by the program and offers it to the user.
+It displays the choices one after the other if the user does not want precedent
+"""
+
+
 def find_better_products(category, old_product_db):
+    # Init has a counter
     a = 1
+
+    # create a infinite loop
     while True:
+
+        # Request to servers for take the data in API
         result = requests.get(category.url + "/" + str(a) + ".json")
         response = result.json()
+
+        # Enumerate the data (better products)
         for idx, product in enumerate(response['products']):
             if 'nutrition_grades' in product and product['nutrition_grades'] == 'a':
-                print("Produit Subsituable:" '\n' "Nom du produit:", product['product_name'], '\n' 
+                print("Produit Subsituable:" '\n' "Nom du produit:", product['product_name'], '\n'
                       "Indice nutrionnel: ", product['nutrition_grades'])
                 print('Appuyez sur <<N>> pour passer au produit suivant.', '\n'
-                      'Appuyez sur <<Y>> pour sélectionner l\'aliment.')
+                       'Appuyez sur <<Y>> pour sélectionner l\'aliment.')
 
+                # Allow the user do a choice for continue to run and check user choice
                 input_user = input()
                 if (input_user == "n") or (input_user == "N"):
                     pass
@@ -104,18 +157,29 @@ def find_better_products(category, old_product_db):
         a += 1
 
 
+"""
+The function below records the new product and its description
+Then saving in the substitute table the choice of the user which subsequently allows to 
+find and display the substituted products (old_product -> new_product)
+"""
+
+
 def subsitution_product(new_product_api, category, old_product_db):
+    # Save the description of new product
     description_product(new_product_api)
+
     print("Voulez-vous effectuer l'échange de votre ancien produit avec celui-ci ?"'\n'
           "Appuyez sur <<Y>> pour valider."'\n'
           "Appuyez sur <<N>> pour revenir au menu de séléction des catégories."'\n'
           "Appuyez sur <<M>> pour revenir au menu.")
 
+    # Allow the user do a choice for continue to run and check user choice
     input_user = input()
     if (input_user == "n") or (input_user == "N"):
         return
     elif (input_user == "y") or (input_user == "Y"):
 
+        # Save the new product in databse
         new_product_db = Product(image_url=new_product_api['image_url'],
                                  name=new_product_api['product_name'],
                                  code=new_product_api['code'],
@@ -127,6 +191,7 @@ def subsitution_product(new_product_api, category, old_product_db):
             new_product_db.ingredients = new_product_api['ingredients_text_fr']
         new_product_db.save()
 
+        # Save the substitution in database
         subsitution = Substitution(old_product=old_product_db, new_product=new_product_db)
         subsitution.save()
 
@@ -135,6 +200,12 @@ def subsitution_product(new_product_api, category, old_product_db):
 
     else:
         print('Vous devez choisir une proposition correct.')
+
+"""
+The product description function will save the product descriptions selected by the user in the database.
+It will save the old and the new product by checking some tags related to the API in which case it will 
+create the missing tags with default values added.
+"""
 
 
 def description_product(description_to_product):
@@ -153,13 +224,17 @@ def description_product(description_to_product):
 
     print("Voici la description du produit séléctionné:"'\n'
           "Nom du produit:", description_to_product['product_name'], '\n'
-          "Lien du produit :", description_to_product['url'],          '\n'
+                                                                     "Lien du produit :", description_to_product['url'],
+          '\n'
           "Indice nutritionnel:", description_to_product['nutrition_grades'], '\n'
-          "Manufacture du produit: ", description_to_product['purchase_places'], '\n'
-          "Pays ou le produit est disponible: ", description_to_product['countries'], '\n'
-          "Magasin avec ce produit disponible: ", description_to_product['stores_tags'], '\n'
-          "PS: Sachez que des informations de types déscriptifs supplémentaires apparaîtrons dans votre "
-          "base de données à chaque séléction d'un produit permettant une mise à jour automatique."'\n')
+                                                                              "Manufacture du produit: ",
+          description_to_product['purchase_places'], '\n'
+                                                     "Pays ou le produit est disponible: ",
+          description_to_product['countries'], '\n'
+                                               "Magasin avec ce produit disponible: ",
+          description_to_product['stores_tags'], '\n'
+                                                 "PS: Sachez que des informations de types déscriptifs supplémentaires apparaîtrons dans votre "
+                                                 "base de données à chaque séléction d'un produit permettant une mise à jour automatique."'\n')
 
     description = Description()
     if 'store_tags' in description_to_product:
@@ -183,20 +258,35 @@ def description_product(description_to_product):
 
     description.save()
 
+"""
+Choice 1 is the function proposed at the beginning by the program to replace a product with a new product.
+This function will search the database with the category table all categories and them display, 
+then the user will select a category.
+"""
+
 
 def choice_1():
+    # Create a object for all category
     AllCategory = Category.objects.all()
+
+    # Create a pagination
     page = Paginator(AllCategory, 10)
+
+    # Init has a counter
     i = 1
+
+    # create a infinite loop
     while True:
+        # Enumerate the data in database and the pages
         categories = page.page(i)
         for idx, categorie in enumerate(categories):
             print(idx + 1, categorie, '\n')
         print(page.page(i), '\n'
-              "Appuyez sur <<N>> pour passer à la page suivante. "'\n'
-              "Appuyez sur <<P>> pour revenir à la page précédente. "'\n'
-              "Appuyez sur <<M>> pour revenir au menu. "'\n')
+                            "Appuyez sur <<N>> pour passer à la page suivante. "'\n'
+                            "Appuyez sur <<P>> pour revenir à la page précédente. "'\n'
+                            "Appuyez sur <<M>> pour revenir au menu. "'\n')
 
+        # Allow the user do a choice for continue to run and check user choice
         input_user = input()
         if (input_user == "n") or (input_user == "N") and page.page(i).has_next() is True:
             i += 1
@@ -214,15 +304,18 @@ def choice_1():
 
 
 def choice_2():
+    # Create a object for all substitutions
     AllSubstituion = list(Substitution.objects.all())
+
+    # Create a loop for browse the substitutions and display
     for substitution in AllSubstituion:
         print("Voici vos produits substitués:" '\n'
-              "Categroie :", substitution.old_product.category,'\n',
+              "Categroie :", substitution.old_product.category, '\n',
               substitution.old_product.name, "->", substitution.new_product.name, '\n'
-              ""'\n'
-              "Appuyez sur <<M>> pour revenir au menu." '\n'
-              "Tapez <<Exit>> pour fermer le programme. ")
-
+                                                                                  ""'\n'
+                                                                                  "Appuyez sur <<M>> pour revenir au menu." '\n'
+                                                                                  "Tapez <<Exit>> pour fermer le programme. ")
+    # Allow the user do a choice for continue to run and check user choice
     input_user = input()
     if (input_user == "m") or (input_user == "M"):
         main()
@@ -234,7 +327,7 @@ def choice_2():
         print('Vous devez choisir une proposition correct.')
         main()
 
-
+# Start point to execute this program
 if __name__ == '__main__':
     main()
 
