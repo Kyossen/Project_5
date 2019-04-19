@@ -1,7 +1,17 @@
+# usr/env/bin Python3.4
+# coding:utf-8
+
+"""
+Import this module of the Django for create "model" to create database with the code below
+"""
+
+# Import Django
 from django.db import models
 
-# Create your models here.
-from django.db import models
+""""
+Description" class to create a description table in the Database
+This table can handler of the descriptions to products
+"""
 
 
 class Description(models.Model):
@@ -21,6 +31,15 @@ class Description(models.Model):
         ordering = ['id']
 
 
+"""
+"Category" to create a category table in the database
+This table is manager of the category
+This table allows of group all table in databse and manage of the categories in databse. 
+This table allow as well of a user mange in program run
+She regroup all categorie in API
+"""
+
+
 class Category(models.Model):
     name = models.CharField(max_length=255)
     id_off = models.CharField(max_length=255)
@@ -35,13 +54,20 @@ class Category(models.Model):
         ordering = ['id']
 
 
+"""
+"Product" class to create a product table in Database
+This table can handler of the descriptions and data to products
+Descriptions can be manipulated extensively since the link between "Description" and "Product"
+"""
+
+
 class Product(models.Model):
     image_url = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     code = models.CharField(max_length=255)
     nutrition_grade = models.CharField(max_length=255)
     ingredients = models.TextField(default='')
-    #description = models.OneToOneField(Description, on_delete=models.CASCADE, related_name="product")
+    # description = models.OneToOneField(Description, on_delete=models.CASCADE, related_name="product")
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="products")
 
     class Meta:
@@ -50,18 +76,10 @@ class Product(models.Model):
         ordering = ['id']
 
 
-class Substitution(models.Model):
-    old_product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="old_products")
-    new_product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="new_products")
-
-    class Meta:
-        managed = True
-        db_table = "Substitutions"
-        ordering = ['id']
-    class Meta:
-        managed = True
-        db_table = "Products"
-        ordering = ['id']
+"""
+"Substituion" class to create a substitution table in Database
+This table allow print the substituions that the user do and of the saves in Database 
+"""
 
 
 class Substitution(models.Model):
