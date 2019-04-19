@@ -1,13 +1,31 @@
-import requests
+# usr/env/bin Python3.4
+# coding:utf-8
+
+"""
+Import these modules for a good use of the program
+Requests module for that the can program "requests to servers"
+Django for requests handler between servers and code, database, etc...
+And others modules such "os" for good use
+"""
+
+# Import lib
 import os
 import sys
+
+# Import module
+import requests
+
+# Import Django
 import django
 from django.core.paginator import Paginator
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "Project_5.settings")
 django.setup()
+
+# Import file
 from purebeurre.models import Category
 
+"""This code is for save in database the totality of the categories in API to use program correctly"""
 result = requests.get("https://fr.openfoodfacts.org/categories.json")
 response = result.json()
 
