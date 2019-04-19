@@ -1,8 +1,18 @@
-#!/usr/bin/env python
+# usr/env/bin Python3.4
+# coding:utf-8
+
+"""
+Import these modules for a good use of the program
+"""
+
+# Import lib
 import os
 import sys
+
+# Import file
 import Project_5.settings
 
+"""The code below is base code, he not need is touch except to add the settings file"""
 if __name__ == '__main__':
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Project_5.settings')
     try:
