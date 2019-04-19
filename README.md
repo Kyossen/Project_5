@@ -14,7 +14,7 @@ Via the file "import_category" you will be able to update the table categories o
 
 #### First you download and install python3 and pip3  
 #### Second you download and install MySql
-#### If you want easy to use the database I suggest you download and install "PhpMyAdmin" then you the connect on your database (MySql)
+### If you want easy to use the database I suggest you download and install "PhpMyAdmin" then you the connect on your database (MySql)
 #### Third you download the program
 #### For this you click on "download" or you enter this command in your terminal:
 ### git clone https://github.com/Kyossen/Project_5/.git
