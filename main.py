@@ -74,18 +74,21 @@ def choice_product(category):
             print(idx + 1, product['product_name'], '\n'
                                                     "Nutrition grades: ", nutrition_grades, '\n')
         print("Page {} / {}".format(a, nb_page), '\n'
-                                                 "Appuyez sur <<N>> pour passer à la page suivante. "'\n'
-                                                 "Appuyez sur <<P>> pour revenir à la page précédente. "'\n'
-                                                 "Appuyez sur <<M>> pour revenir au menu. "'\n')
+              "Appuyez sur <<N>> pour passer à la page suivante. "'\n'
+              "Appuyez sur <<P>> pour revenir à la page précédente. "'\n'
+              "Appuyez sur <<R>> pour revenir à la sélection des catégories. "'\n'
+              "Appuyez sur <<M>> pour revenir au menu. "'\n')
 
         # Allow the user do a choice for continue to run and check user choice
         input_user = input()
-        if (input_user == "n") or (input_user == "N") and a < nb_page:
+        if input_user.lower() == "n" and a < nb_page:
             a += 1
-        elif (input_user == "p") or (input_user == "P") and a > 1:
+        elif input_user.lower() == "p" and a > 1:
             a -= 1
-        elif (input_user == "m") or (input_user == "M"):
+        elif input_user.lower() == "m":
             main()
+        elif input_user.lower() == "r":
+            return
         elif input_user.isdigit():
             x = int(input_user) - 1
             if 20 >= int(input_user) >= 1:
@@ -96,14 +99,14 @@ def choice_product(category):
 
             # Save product and that description in database
             old_product_api = response['products'][x]
-            description_product(old_product_api)
+            description = description_product(old_product_api)
 
             old_product_db = Product(image_url=old_product_api['image_url'],
                                      name=old_product_api['product_name'],
                                      code=old_product_api['code'],
                                      nutrition_grade=old_product_api['nutrition_grades'],
                                      ingredients=old_product_api['ingredients_text_fr'],
-
+                                     description=description,
                                      category=category)
 
             if 'ingredients_text_fr' in old_product_api:
@@ -112,7 +115,6 @@ def choice_product(category):
             old_product_db.save()
             find_better_products(category, old_product_db)
             return
-
 
         else:
             print('Vous devez choisir une proposition correct.')
@@ -142,13 +144,13 @@ def find_better_products(category, old_product_db):
                 print("Produit Subsituable:" '\n' "Nom du produit:", product['product_name'], '\n'
                       "Indice nutrionnel: ", product['nutrition_grades'])
                 print('Appuyez sur <<N>> pour passer au produit suivant.', '\n'
-                       'Appuyez sur <<Y>> pour sélectionner l\'aliment.')
+                      'Appuyez sur <<Y>> pour sélectionner l\'aliment.')
 
                 # Allow the user do a choice for continue to run and check user choice
                 input_user = input()
-                if (input_user == "n") or (input_user == "N"):
+                if input_user.lower() == "n":
                     pass
-                elif (input_user == "y") or (input_user == "Y"):
+                elif input_user.lower() == "y":
                     new_product_api = product
                     subsitution_product(new_product_api, category, old_product_db)
                     return
@@ -165,26 +167,27 @@ find and display the substituted products (old_product -> new_product)
 
 
 def subsitution_product(new_product_api, category, old_product_db):
-    # Save the description of new product
-    description_product(new_product_api)
 
     print("Voulez-vous effectuer l'échange de votre ancien produit avec celui-ci ?"'\n'
           "Appuyez sur <<Y>> pour valider."'\n'
-          "Appuyez sur <<N>> pour revenir au menu de séléction des catégories."'\n'
+          "Appuyez sur <<R>> pour revenir au menu de séléction des catégories."'\n'
           "Appuyez sur <<M>> pour revenir au menu.")
 
     # Allow the user do a choice for continue to run and check user choice
     input_user = input()
-    if (input_user == "n") or (input_user == "N"):
+    if input_user.lower() == "r":
         return
-    elif (input_user == "y") or (input_user == "Y"):
+    elif input_user.lower() == "y":
 
-        # Save the new product in databse
+        # Save product and that description in database
+        description = description_product(new_product_api)
+
         new_product_db = Product(image_url=new_product_api['image_url'],
                                  name=new_product_api['product_name'],
                                  code=new_product_api['code'],
                                  nutrition_grade=new_product_api['nutrition_grades'],
                                  ingredients=new_product_api['ingredients_text_fr'],
+                                 description=description,
                                  category=category)
 
         if 'ingredients_text_fr' in new_product_api:
@@ -195,7 +198,7 @@ def subsitution_product(new_product_api, category, old_product_db):
         subsitution = Substitution(old_product=old_product_db, new_product=new_product_db)
         subsitution.save()
 
-    elif (input_user == "m") or (input_user == "M"):
+    elif input_user.lower() == "m":
         main()
 
     else:
@@ -224,17 +227,13 @@ def description_product(description_to_product):
 
     print("Voici la description du produit séléctionné:"'\n'
           "Nom du produit:", description_to_product['product_name'], '\n'
-                                                                     "Lien du produit :", description_to_product['url'],
-          '\n'
+          "Lien du produit :", description_to_product['url'], '\n'
           "Indice nutritionnel:", description_to_product['nutrition_grades'], '\n'
-                                                                              "Manufacture du produit: ",
-          description_to_product['purchase_places'], '\n'
-                                                     "Pays ou le produit est disponible: ",
-          description_to_product['countries'], '\n'
-                                               "Magasin avec ce produit disponible: ",
-          description_to_product['stores_tags'], '\n'
-                                                 "PS: Sachez que des informations de types déscriptifs supplémentaires apparaîtrons dans votre "
-                                                 "base de données à chaque séléction d'un produit permettant une mise à jour automatique."'\n')
+          "Manufacture du produit: ", description_to_product['purchase_places'], '\n'
+          "Pays ou le produit est disponible: ", description_to_product['countries'], '\n'
+          "Magasin avec ce produit disponible: ", description_to_product['stores_tags'], '\n'
+          "PS: Sachez que des informations de types déscriptifs supplémentaires apparaîtrons dans votre "
+          "base de données à chaque séléction d'un produit permettant une mise à jour automatique."'\n')
 
     description = Description()
     if 'store_tags' in description_to_product:
@@ -257,6 +256,7 @@ def description_product(description_to_product):
         description.serving_size = description_to_product['serving_size']
 
     description.save()
+    return description
 
 """
 Choice 1 is the function proposed at the beginning by the program to replace a product with a new product.
@@ -267,10 +267,10 @@ then the user will select a category.
 
 def choice_1():
     # Create a object for all category
-    AllCategory = Category.objects.all()
+    all_category = Category.objects.all()
 
     # Create a pagination
-    page = Paginator(AllCategory, 10)
+    page = Paginator(all_category, 10)
 
     # Init has a counter
     i = 1
@@ -288,47 +288,49 @@ def choice_1():
 
         # Allow the user do a choice for continue to run and check user choice
         input_user = input()
-        if (input_user == "n") or (input_user == "N") and page.page(i).has_next() is True:
+        if input_user.lower() == "n" and page.page(i).has_next() is True:
             i += 1
-        elif (input_user == "p") or (input_user == "P") and page.page(i).has_previous() is True:
+        elif input_user.lower() == "p" and page.page(i).has_previous() is True:
             i -= 1
-        elif (input_user == "m") or (input_user == "M"):
+        elif input_user.lower() == "m":
             main()
-        elif input_user.isdigit():
-            if 10 >= int(input_user) >= 1:
-                choice_product(categories[int(input_user) - 1])
-            else:
-                print('Vous devez choisir une proposition correct.')
+        elif input_user.isdigit() and 10 >= int(input_user) >= 1:
+            choice_product(categories[int(input_user) - 1])
         else:
             print('Vous devez choisir une proposition correct.')
 
 
 def choice_2():
     # Create a object for all substitutions
-    AllSubstituion = list(Substitution.objects.all())
+    all_substituion = list(Substitution.objects.all())
 
     # Create a loop for browse the substitutions and display
-    for substitution in AllSubstituion:
+    for substitution in all_substituion:
         print("Voici vos produits substitués:" '\n'
               "Categroie :", substitution.old_product.category, '\n',
               substitution.old_product.name, "->", substitution.new_product.name, '\n'
-                                                                                  ""'\n'
-                                                                                  "Appuyez sur <<M>> pour revenir au menu." '\n'
-                                                                                  "Tapez <<Exit>> pour fermer le programme. ")
-    # Allow the user do a choice for continue to run and check user choice
-    input_user = input()
-    if (input_user == "m") or (input_user == "M"):
-        main()
-    elif (input_user == "exit") or (input_user == "Exit"):
-        print("Merci d'avoir utilisé se programme." '\n'
-              "Bonne journée/Bonne soirée.")
-        sys.exit()
-    else:
-        print('Vous devez choisir une proposition correct.')
-        main()
+              "Appuyez sur <<M>> pour revenir au menu." '\n'
+              "Tapez <<Exit>> pour fermer le programme. ")
+
+    while True:
+        # Allow the user do a choice for continue to run and check user choice
+        input_user = input()
+        if input_user.lower() == "m":
+            main()
+        elif input_user.lower() == "exit":
+            print("Merci d'avoir utilisé se programme." '\n'
+                  "Bonne journée/Bonne soirée.")
+            sys.exit()
+        else:
+            print('Vous devez choisir une proposition correct.')
+
 
 # Start point to execute this program
 if __name__ == '__main__':
     main()
 
-# Description lié à un produit
+# Pagination substitution
+# Afficher par colonne https://stackoverflow.com/questions/12091687/loop-print-through-two-lists-to-get-two-columns-with-fixedcustom-set-space-bet
+# requirements.txt
+# flake8
+# Finir les livrables
