@@ -22,6 +22,6 @@ Via the file "import_category" you will be able to update the table categories o
 #### For use the program:
 ##### cd Project_5
 ##### sudo pip3 install -r requirements.txt
-##### sudo chmod +x main.py for Unix user
-##### 1 -> ./py main.py
-##### 2 -> python3 main.py
+##### sudo chmod +x <<main.py>> and <<import_categories.py>> for Unix user
+##### 1 -> ./py import_categories.py or python3 import_categories.py
+##### 2 -> ./py main.py or python3 main.py
