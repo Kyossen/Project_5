@@ -2,7 +2,8 @@
 # coding:utf-8
 
 """
-Import this module of the Django for create "model" to create database with the code below
+Import this module of the Django for create "model" to create database
+with the code below
 """
 
 # Import Django
@@ -15,15 +16,24 @@ This table can handler of the descriptions to products
 
 
 class Description(models.Model):
-    purchase_places = models.CharField(max_length=255, null=True, blank=True, default='')
-    product_quantity = models.IntegerField(null=True, blank=True, default=None)
-    labels_hierarchy = models.CharField(max_length=255, null=True, blank=True, default='')
-    quality_tags = models.CharField(max_length=255, null=True, blank=True, default='')
-    manufacturing_places = models.CharField(max_length=255, null=True, blank=True, default='')
-    brands_tags = models.CharField(max_length=255, null=True, blank=True, default='')
-    origins = models.CharField(max_length=255, null=True, blank=True, default='')
-    stores_tags = models.CharField(max_length=255, null=True, blank=True, default='')
-    serving_size = models.CharField(max_length=255, null=True, blank=True, default='')
+    purchase_places = models.CharField(max_length=255, null=True,
+                                       blank=True, default='')
+    product_quantity = models.IntegerField(null=True, blank=True,
+                                           default=None)
+    labels_hierarchy = models.CharField(max_length=255, null=True,
+                                        blank=True, default='')
+    quality_tags = models.CharField(max_length=255, null=True,
+                                    blank=True, default='')
+    manufacturing_places = models.CharField(max_length=255, null=True,
+                                            blank=True, default='')
+    brands_tags = models.CharField(max_length=255, null=True,
+                                   blank=True, default='')
+    origins = models.CharField(max_length=255, null=True,
+                               blank=True, default='')
+    stores_tags = models.CharField(max_length=255, null=True,
+                                   blank=True, default='')
+    serving_size = models.CharField(max_length=255, null=True,
+                                    blank=True, default='')
 
     class Meta:
         managed = True
@@ -34,7 +44,8 @@ class Description(models.Model):
 """
 "Category" to create a category table in the database
 This table is manager of the category
-This table allows of group all table in databse and manage of the categories in databse. 
+This table allows of group all table in database and manage of
+the categories in database.
 This table allow as well of a user mange in program run
 She regroup all categorie in API
 """
@@ -57,17 +68,22 @@ class Category(models.Model):
 """
 "Product" class to create a product table in Database
 This table can handler of the descriptions and data to products
-Descriptions can be manipulated extensively since the link between "Description" and "Product"
+Descriptions can be manipulated extensively,
+since the link between "Description" and "Product"
 """
+
+
 class Product(models.Model):
     image_url = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     code = models.CharField(max_length=255)
     nutrition_grade = models.CharField(max_length=255)
     ingredients = models.TextField(default='')
-    description = models.OneToOneField(Description, on_delete=models.CASCADE, related_name="product", default=None,
+    description = models.OneToOneField(Description, on_delete=models.CASCADE,
+                                       related_name="product", default=None,
                                        null=True)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="products")
+    category = models.ForeignKey(Category, on_delete=models.CASCADE,
+                                 related_name="products")
 
     class Meta:
         managed = True
@@ -76,14 +92,17 @@ class Product(models.Model):
 
 
 """
-"Substituion" class to create a substitution table in Database
-This table allow print the substituions that the user do and of the saves in Database 
+"Substitution" class to create a substitution table in Database
+This table allow print the substitutions that the user do and
+of the saves in Database
 """
 
 
 class Substitution(models.Model):
-    old_product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="old_products")
-    new_product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="new_products")
+    old_product = models.ForeignKey(Product, on_delete=models.CASCADE,
+                                    related_name="old_products")
+    new_product = models.ForeignKey(Product, on_delete=models.CASCADE,
+                                    related_name="new_products")
 
     class Meta:
         managed = True
