@@ -46,7 +46,7 @@ class Category(models.Model):
     url = models.CharField(max_length=255)
 
     def __str__(self):
-        return "{0} {1} {2}".format(self.name, self.id_off, self.url)
+        return "{0} {1}".format(self.name, self.url)
 
     class Meta:
         managed = True
@@ -59,15 +59,14 @@ class Category(models.Model):
 This table can handler of the descriptions and data to products
 Descriptions can be manipulated extensively since the link between "Description" and "Product"
 """
-
-
 class Product(models.Model):
     image_url = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     code = models.CharField(max_length=255)
     nutrition_grade = models.CharField(max_length=255)
     ingredients = models.TextField(default='')
-    # description = models.OneToOneField(Description, on_delete=models.CASCADE, related_name="product")
+    description = models.OneToOneField(Description, on_delete=models.CASCADE, related_name="product", default=None,
+                                       null=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="products")
 
     class Meta:
