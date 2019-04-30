@@ -10,7 +10,6 @@ Thanks to this you will be able to:
 - Substitute the ingredients you do not want with new ones
 - You will have descriptions defined at the time of the selection of the products (places of purchase, manufacture, nutritional index, etc ...)
 - You will be able to consult your substitutions
-Via the file "import_category" you will be able to update the table categories of your database instantly, the rest of the program works with the API allowing you to update automatically the products in real time
 
 #### First you download and install python3 and pip3  
 #### Second you download and install MySql
@@ -22,6 +21,5 @@ Via the file "import_category" you will be able to update the table categories o
 #### For use the program:
 ##### cd Project_5
 ##### sudo pip3 install -r requirements.txt
-##### sudo chmod +x <<main.py>> and <<import_categories.py>> for Unix user
-##### 1 -> ./py import_categories.py or python3 import_categories.py
-##### 2 -> ./py main.py or python3 main.py
+##### sudo chmod +x <<main.py>> for Unix user
+##### 1 -> ./py main.py or python3 main.py
