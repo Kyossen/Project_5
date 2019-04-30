@@ -7,7 +7,6 @@ Requests module for that the can program "requests to servers"
 Django for requests handler between servers and code, database, etc...
 And others modules such "os" for good use
 """
-
 # Import lib
 import os
 import sys
@@ -31,21 +30,19 @@ from purebeurre.models import Category, Product, Description, Substitution
 
 
 def main():
+    while True:
+        # Display the proposals of the user
+        print('1 - Quel aliment souhaitez-vous remplacer ?''\n'
+              '2 - Retrouvez vos aliments substitués.')
+        x = input()
 
-    # Display the proposals of the user
-    print('1 - Quel aliment souhaitez-vous remplacer ?''\n'
-          '2 - Retrouvez vos aliments substitués.')
-    x = input()
-
-    # Create a input() for user choice a proposal and check inptu()
-    if x == "1":
-        choice_1()
-    elif x == "2":
-        choice_2()
-        pass
-    else:
-        print('Vous devez choisir une proposition correct.')
-        main()
+        # Create a input() for user choice a proposal and check inptu()
+        if x == "1":
+            choice_1()
+        elif x == "2":
+            choice_2()
+        else:
+            print('Vous devez choisir une proposition correct.''\n')
 
 
 """
@@ -58,13 +55,12 @@ The product will are save in database with that description
 def choice_product(category):
     # Init has a counter
     a = 1
-    print("Catégorie choisie: ", category, '\n')
 
     # create a infinite loop
     while True:
 
         # Request to servers for take the data in API
-        result = requests.get(category.url + "/" + str(a) + ".json")
+        result = requests.get(category + "/" + str(a) + ".json")
         response = result.json()
         nb_page = math.ceil(response["count"] / response["page_size"])
 
@@ -89,7 +85,7 @@ def choice_product(category):
         elif input_user.lower() == "p" and a > 1:
             a -= 1
         elif input_user.lower() == "m":
-            main()
+            return -1
         elif input_user.lower() == "r":
             return
         elif input_user.isdigit():
@@ -97,10 +93,14 @@ def choice_product(category):
             if 20 >= int(input_user) >= 1:
                 pass
             else:
-                print('Vous devez choisir une proposition correct.')
-                break
+                print('Vous devez choisir une proposition correct.''\n')
+                continue
 
             # Save product and that description in database
+            categories = Category(name=response['products'][x]['product_name'],
+                                  url=response['products'][x]['url'])
+            categories.save()
+
             old_product_api = response['products'][x]
             description = description_product(old_product_api)
 
@@ -112,7 +112,7 @@ def choice_product(category):
                                      ingredients=old_product_api
                                      ['ingredients_text_fr'],
                                      description=description,
-                                     category=category)
+                                     category=categories)
 
             if 'ingredients_text_fr' in \
                     old_product_api:
@@ -122,9 +122,6 @@ def choice_product(category):
             old_product_db.save()
             find_better_products(category, old_product_db)
             return
-
-        else:
-            print('Vous devez choisir une proposition correct.')
 
 
 """
@@ -142,7 +139,7 @@ def find_better_products(category, old_product_db):
     while True:
 
         # Request to servers for take the data in API
-        result = requests.get(category.url + "/" + str(a) + ".json")
+        result = requests.get(category + "/" + str(a) + ".json")
         response = result.json()
 
         # Enumerate the data (better products)
@@ -153,6 +150,11 @@ def find_better_products(category, old_product_db):
                       product['product_name'], '\n'
                       "Indice nutrionnel: ",
                       product['nutrition_grades'])
+
+                save_product_name = product['product_name']
+                save_product_grades = product['nutrition_grades']
+
+
                 print(""'\n'
                       'Appuyez sur <<N>> pour passer au produit suivant.', '\n'
                       'Appuyez sur <<Y>> pour sélectionner l\'aliment.')
@@ -165,10 +167,13 @@ def find_better_products(category, old_product_db):
                 elif input_user.lower() == "y":
                     new_product_api = product
                     substitution_product(new_product_api,
-                                         category, old_product_db)
+                                         old_product_db)
                     return
                 else:
-                    print('Vous devez choisir une proposition correct.')
+                    print('Vous devez choisir une proposition correct.''\n')
+
+                    # print(save_product_name, save_product_grades)
+
         a += 1
 
 
@@ -180,13 +185,13 @@ the substituted products (old_product -> new_product)
 """
 
 
-def substitution_product(new_product_api, category, old_product_db):
+def substitution_product(new_product_api, old_product_db):
 
-    print("Voulez-vous effectuer l'échange de votre"
+    print("Voulez-vous effectuer l'échange de votre "
           "ancien produit avec celui-ci ?"'\n'
           "Appuyez sur <<Y>> pour valider."'\n'
           ""'\n'
-          "Appuyez sur <<R>> pour revenir au menu"
+          "Appuyez sur <<R>> pour revenir à la sélection des catégories."
           "de séléction des catégories."'\n'
           "Appuyez sur <<M>> pour revenir au menu.")
 
@@ -197,6 +202,10 @@ def substitution_product(new_product_api, category, old_product_db):
     elif input_user.lower() == "y":
 
         # Save product and that description in database
+        categories = Category(name=new_product_api['product_name'],
+                              url=new_product_api['url'])
+        categories.save()
+
         description = description_product(new_product_api)
 
         new_product_db = Product(image_url=new_product_api['image_url'],
@@ -207,7 +216,7 @@ def substitution_product(new_product_api, category, old_product_db):
                                  ingredients=new_product_api
                                  ['ingredients_text_fr'],
                                  description=description,
-                                 category=category)
+                                 category=categories)
 
         if 'ingredients_text_fr' in new_product_api:
             new_product_db.ingredients = new_product_api['ingredients_text_fr']
@@ -219,10 +228,10 @@ def substitution_product(new_product_api, category, old_product_db):
         substitution.save()
 
     elif input_user.lower() == "m":
-        main()
+        return
 
     else:
-        print('Vous devez choisir une proposition correct.')
+        print('Vous devez choisir une proposition correct.''\n')
 
     """
     The product description function will save
@@ -258,7 +267,7 @@ def description_product(description_to_product):
           description_to_product['countries'], '\n'
           "Magasin avec ce produit disponible: ",
           description_to_product['stores_tags'], '\n'
-          "PS: Sachez que des informations de types"
+          "PS: Sachez que des informations de types "
           "déscriptifs supplémentaires apparaîtrons dans votre "
           "base de données à chaque séléction d'un"
           "produit permettant une mise à jour automatique."'\n')
@@ -296,47 +305,73 @@ def description_product(description_to_product):
 """
 Choice 1 is the function proposed at the beginning
 by the program to replace a product with a new product.
-This function will search the database with
-the category table all categories and them display,
-then the user will select a category.
+This function will search the API database for all categories and display them,
+then the user will select a category then using the program it will be saved
+to the confirmation of the selection of the substitution
 """
 
 
 def choice_1():
-    # Create a object for all category
-    all_category = Category.objects.all()
-
-    # Create a pagination
-    page = Paginator(all_category, 10)
-
     # Init has a counter
-    i = 1
+    a = 1
+    i = 0
+
+    # Request to API for a search in category
+    result = requests.get("https://fr.openfoodfacts.org/categories.json")
+    response = result.json()
+
+    # Init a number pages
+    nb_page = math.ceil(response["count"] / 10)
+
+    # Init a number choice for user
+    nb_choice = 1
 
     # create a infinite loop
     while True:
-        # Enumerate the data in database and the pages
-        categories = page.page(i)
 
-        # Create a loop for browse the categories and display
-        for idx, categorie in enumerate(categories):
-            print(idx + 1, categorie, '\n')
-        print(page.page(i), '\n'
+        # Create a loop for browse the categories of the API and display
+        e = 0
+        while e != 10:
+            for categorie in response:
+                print(nb_choice, response["tags"][i]["name"],
+                      response["tags"][i]["products"],
+                      response["tags"][i]["url"], '\n')
+                i += 1
+                e += 1
+                nb_choice += 1
+                if nb_choice > 10:
+                    nb_choice = 1
+
+        print("Page {} / {}".format(a, nb_page), '\n'
               "Appuyez sur <<N>> pour passer à la page suivante. "'\n'
               "Appuyez sur <<P>> pour revenir à la page précédente. "'\n'
               "Appuyez sur <<M>> pour revenir au menu. "'\n')
 
         # Allow the user do a choice for continue to run and check user choice
         input_user = input()
-        if input_user.lower() == "n" and page.page(i).has_next() is True:
-            i += 1
-        elif input_user.lower() == "p" and page.page(i).has_previous() is True:
-            i -= 1
+        if input_user.lower() == "n" and a < nb_page:
+            a += 1
+        elif input_user.lower() == "p" and a > 1:
+            a -= 1
         elif input_user.lower() == "m":
-            main()
+            return -1
         elif input_user.isdigit() and 10 >= int(input_user) >= 1:
-            choice_product(categories[int(input_user) - 1])
+            print("Catégorie choisie: ",
+                  response["tags"][int(input_user) - 1]["name"], '\n'
+                  "URL de la catégorie: ",
+                  response["tags"][int(input_user) - 1]["url"], '\n')
+            return_value = choice_product(response
+                                          ["tags"][int(input_user) - 1]["url"])
+            if return_value == -1:
+                return
+
         else:
-            print('Vous devez choisir une proposition correct.')
+            print('Vous devez choisir une proposition correct.''\n')
+            i -= 10
+
+
+"""The function below will allow the user to see his substitutions
+done and saved in database."""
 
 
 def choice_2():
@@ -375,7 +410,7 @@ def choice_2():
                     page.page(i).has_previous() is True:
                 i -= 1
             elif input_user.lower() == "m":
-                main()
+                return -1
             elif input_user.lower() == "exit":
                 print("Merci d'avoir utilisé se programme." '\n'
                       "Bonne journée/Bonne soirée.")
