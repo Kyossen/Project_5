@@ -120,7 +120,9 @@ def choice_product(category):
                     old_product_api['ingredients_text_fr']
 
             old_product_db.save()
-            find_better_products(category, old_product_db)
+            return_value = find_better_products(category, old_product_db)
+            if return_value == -1:
+                return -1
             return
 
 
@@ -150,30 +152,26 @@ def find_better_products(category, old_product_db):
                       product['product_name'], '\n'
                       "Indice nutrionnel: ",
                       product['nutrition_grades'])
-
-                save_product_name = product['product_name']
-                save_product_grades = product['nutrition_grades']
-
-
                 print(""'\n'
                       'Appuyez sur <<N>> pour passer au produit suivant.', '\n'
                       'Appuyez sur <<Y>> pour sélectionner l\'aliment.')
 
                 """Allow the user do a choice for continue
                 to run and check user choice"""
-                input_user = input()
-                if input_user.lower() == "n":
-                    pass
-                elif input_user.lower() == "y":
-                    new_product_api = product
-                    substitution_product(new_product_api,
-                                         old_product_db)
-                    return
-                else:
-                    print('Vous devez choisir une proposition correct.''\n')
-
-                    # print(save_product_name, save_product_grades)
-
+                while True:
+                    input_user = input()
+                    if input_user.lower() == "n":
+                        break
+                    elif input_user.lower() == "y":
+                        new_product_api = product
+                        return_value = substitution_product(new_product_api,
+                                                            old_product_db)
+                        if return_value == -1:
+                            return -1
+                        return
+                    else:
+                        print('Vous devez choisir une proposition correct.'
+                              '\n')
         a += 1
 
 
@@ -228,7 +226,7 @@ def substitution_product(new_product_api, old_product_db):
         substitution.save()
 
     elif input_user.lower() == "m":
-        return
+        return -1
 
     else:
         print('Vous devez choisir une proposition correct.''\n')
