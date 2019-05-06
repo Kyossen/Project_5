@@ -330,15 +330,21 @@ def choice_1():
         # Create a loop for browse the categories of the API and display
         e = 0
         while e != 10:
-            for categorie in response:
-                print(nb_choice, response["tags"][i]["name"],
-                      response["tags"][i]["products"],
-                      response["tags"][i]["url"], '\n')
-                i += 1
-                e += 1
-                nb_choice += 1
-                if nb_choice > 10:
-                    nb_choice = 1
+
+            # Create column variables for that the display is better readable
+            column1 = response["tags"][i]["products"],\
+                      response["tags"][i]["url"]
+
+            print(nb_choice, response["tags"][i]["name"])
+            for c1 in zip(column1):
+                print('{}'.format(*c1))
+            nb_choice += 1
+            if nb_choice > 10:
+                nb_choice = 1
+
+            # Make sure that the counter is correct
+            i += 1
+            e += 1
 
         print("Page {} / {}".format(a, nb_page), '\n'
               "Appuyez sur <<N>> pour passer à la page suivante. "'\n'
@@ -354,14 +360,16 @@ def choice_1():
         elif input_user.lower() == "m":
             return -1
         elif input_user.isdigit() and 10 >= int(input_user) >= 1:
+            real_index = (a - 1) * 10 + int(input_user) - 1
             print("Catégorie choisie: ",
-                  response["tags"][int(input_user) - 1]["name"], '\n'
+                  response["tags"][real_index]["name"], '\n'
                   "URL de la catégorie: ",
-                  response["tags"][int(input_user) - 1]["url"], '\n')
+                  response["tags"][real_index]["url"], '\n')
             return_value = choice_product(response
-                                          ["tags"][int(input_user) - 1]["url"])
+                                          ["tags"][real_index]["url"])
             if return_value == -1:
                 return
+            i -= 10
 
         else:
             print('Vous devez choisir une proposition correct.''\n')
