@@ -53,7 +53,6 @@ She regroup all categorie in API
 
 class Category(models.Model):
     name = models.CharField(max_length=255)
-    id_off = models.CharField(max_length=255)
     url = models.CharField(max_length=255)
 
     def __str__(self):
