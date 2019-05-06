@@ -331,7 +331,7 @@ def choice_1():
         e = 0
         while e != 10:
 
-            # Create column variables for that the display is better readable
+            # Create column variable for that the display is better readable
             column1 = response["tags"][i]["products"],\
                       response["tags"][i]["url"]
 
